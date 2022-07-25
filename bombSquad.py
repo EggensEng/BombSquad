@@ -233,7 +233,7 @@ def main():
                     mine_field_data[actual_row][actual_column] = CellStatus.FLAG
                 #Spin around
                 risk_sum = abs(analyse_position[0][0]) + abs(analyse_position[0][1]) + abs(analyse_position[0][2]) + abs(analyse_position[1][2]) + abs(analyse_position[2][2]) + abs(analyse_position[2][1]) + abs(analyse_position[2][0]) + abs(analyse_position[1][0])
-                if (risk_sum > 2):
+                if (risk_sum > 3):
                     mine_field_data[actual_row][actual_column] = CellStatus.FLAG
                 #Final option
                 if (mine_field_data[actual_row][actual_column] != CellStatus.FLAG):
@@ -248,7 +248,7 @@ def main():
             #Update sweep position by checking actual and next column
             if (mine_field_data[actual_row][actual_column] >= 0):
                 sweep_position[actual_row] = sweep_position[actual_row] + 1
-                if (actual_column >= field_width):
+                if (sweep_position[actual_row] >= field_width):
                     sweep_position[actual_row] = 0
                 
 
