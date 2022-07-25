@@ -1,0 +1,3 @@
+[submodule "submodule1"]
+        path = DecodeDemcon3
+        url = https://github.com/JeroenVerberneDemcon/DecodeDemcon3
