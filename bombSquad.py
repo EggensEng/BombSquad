@@ -248,6 +248,9 @@ def main():
             #Update sweep position by checking actual and next column
             if (mine_field_data[actual_row][actual_column] >= 0):
                 sweep_position[actual_row] = sweep_position[actual_row] + 1
+                if (actual_column >= field_width):
+                    sweep_position[actual_row] = 0
+                
 
         #Check for next index
         actual_row = actual_row + 1
