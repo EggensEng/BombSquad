@@ -4,12 +4,12 @@ This application will try to clean a minefield using a bomb squad.
 
 ## Installation
 
-###For installing dependencies run:
+### For installing dependencies run:
 pip install -r requirements.txt
 
 ## Run
 
-###Start the application by running:
+### Start the application by running:
 python3.6 bombSquad.py
 
 (The reason that python 3.6 is used is because there were some malfunctions seen with the "TickLabels" above python 3.6)
