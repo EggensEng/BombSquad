@@ -1,6 +1,6 @@
 # BombSquad
 
-This application will try to clean a minefield using a bomb squad.
+This application will try to clean a mine field using a bomb squad.
 
 ## Installation
 
