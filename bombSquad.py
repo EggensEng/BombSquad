@@ -28,34 +28,41 @@ def touch_cell(mine_field, mine_field_data, actual_row, actual_column, field_wid
     '''Touch a specific cell and update this in the minefield data
        Stop the sweep if a bomb is detected
 
-       TODO:
-       Keyword arguments:
-       width -- the width of the mine field
-       height -- the height of the mine field
-       number_of_mines -- hoe many mines will be generated'''
+    Arguments:
+    mine_field -- the mine field class for requesting a cell
+    mine_field_data -- the mine field data storing all positions
+    actual_row -- actual row position for checking
+    actual_column -- actual column position for checking
+    field_width -- defined field width based on difficulty
+    '''
 
     global sweep_active
     if (actual_column >= 0) and (actual_column < field_width) and (sweep_active == True):
         try:
             mine_field_data[actual_row][actual_column] = mine_field.sweep_cell(actual_column, actual_row)
-            if (mine_field_data[actual_row][actual_column] == CellStatus.EXPLODE):
+            if (mine_field_data[actual_row][actual_column] == CellStatus.TRAP):
                 sweep_active = False
         except ExplosionException:
-            mine_field_data[actual_row][actual_column] = CellStatus.EXPLODE
+            mine_field_data[actual_row][actual_column] = CellStatus.TRAP
             sweep_active = False
         except:
-            mine_field_data[actual_row][actual_column] = CellStatus.EXPLODE
+            mine_field_data[actual_row][actual_column] = CellStatus.TRAP
             sweep_active = False
 
-def check_adjacent_cells(mine_field, mine_field_data, analyse_position, touch_cells, actual_row, actual_column, field_height, field_width) -> None:
+def check_adjacent_cells(mine_field, mine_field_data, analyse_position, touch_adjacent_cells, actual_row, actual_column, field_height, field_width) -> None:
     '''Go through all the surrounded cells and only touch them if required.
        Always store the surroundings in an array anyway
 
-       TODO:
-       Keyword arguments:
-       width -- the width of the mine field
-       height -- the height of the mine field
-       number_of_mines -- hoe many mines will be generated'''
+    Arguments:
+    mine_field -- the mine field class for requesting a cell
+    mine_field_data -- the mine field data storing all positions
+    analyse_position -- the 3x3 array that will store adjacent cell status during checking
+    touch_adjacent_cells -- True or False to select if touching cells is required during checking
+    actual_row -- actual row position for checking
+    actual_column -- actual column position for checking
+    field_height -- defined field height based on difficulty
+    field_width -- defined field width based on difficulty
+    '''
 
     dummy_array = [ [ 0 ] * 3 for _ in range(3) ]
     actual_row_offset = actual_row
@@ -65,57 +72,57 @@ def check_adjacent_cells(mine_field, mine_field_data, analyse_position, touch_ce
     if (actual_row > 0):
         actual_row_offset = actual_row - 1
         analyse_position[0][1] = mine_field_data[actual_row_offset][actual_column]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column, field_width)
     # S
     if (actual_row < (field_height - 1)):
         actual_row_offset = actual_row + 1
         analyse_position[2][1] = mine_field_data[actual_row_offset][actual_column]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column, field_width)
     # W
     if (actual_column > 0):
         actual_column_offset = actual_column - 1
         analyse_position[1][0] = mine_field_data[actual_row][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row, actual_column_offset, field_width)
     # E
     if (actual_column < (field_width - 1)):
         actual_column_offset = actual_column + 1
         analyse_position[1][2] = mine_field_data[actual_row][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row, actual_column_offset, field_width)
     # NW
     if (actual_row > 0) and (actual_column > 0):
         actual_row_offset = actual_row - 1
         actual_column_offset = actual_column - 1
         analyse_position[0][0] = mine_field_data[actual_row_offset][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column_offset, field_width)
     # NE
     if (actual_row > 0) and (actual_column < (field_width - 1)):
         actual_row_offset = actual_row - 1
         actual_column_offset = actual_column + 1
         analyse_position[0][2] = mine_field_data[actual_row_offset][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column_offset, field_width)
     # SE
     if (actual_row < (field_height - 1)) and (actual_column < (field_width - 1)):
         actual_row_offset = actual_row + 1
         actual_column_offset = actual_column + 1
         analyse_position[2][2] = mine_field_data[actual_row_offset][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column_offset, field_width)
     # SW
     if (actual_row < (field_height - 1)) and (actual_column > 0):
         actual_row_offset = actual_row + 1
         actual_column_offset = actual_column - 1
         analyse_position[2][0] = mine_field_data[actual_row_offset][actual_column_offset]
-        if (touch_cells):
+        if (touch_adjacent_cells):
             touch_cell(mine_field, mine_field_data, actual_row_offset, actual_column_offset, field_width)
-    #Center
+    # Center
     analyse_position[1][1] = mine_field_data[actual_row][actual_column]
-    if (touch_cells):
+    if (touch_adjacent_cells):
         touch_cell(mine_field, mine_field_data, actual_row, actual_column, field_width)
 
 def main():
@@ -195,8 +202,13 @@ def main():
     risk_sum = 0
     sweep_active = True
     wipe_done = False
-    touch_cells = False
+    touch_adjacent_cells = False
     display_count = 0
+    flag_count = 0
+    adjacent_numbers_count = 0
+    skip_cell = False
+    unknown_cell_found = False
+
     #Create array where index is the height and shall store an actual width position
     sweep_position = [ 0 for _ in range(field_height) ]
     #Set start position
@@ -208,7 +220,7 @@ def main():
         screen_active = mine_field_display.check_screen_active()
         #Update display field
         display_count = display_count + 1
-        if (display_count >= field_height):
+        if (display_count >= 3):
             mine_field_display.update_screen(mine_field_data)
             display_count = 0
 
@@ -225,31 +237,27 @@ def main():
             #|_|_|_|
             #|_|X|_|
             #|_|_|_|
-            #Store surroundings for analyses
+            #Array to store adjacent cells for analyses
             analyse_position = [ [ 0 ] * 3 for _ in range(3) ]
 
-            #Check if column position is within range
+            #Scan adjacent cells and clear them if required
             if (sweep_position[actual_row] >= 0) and (sweep_position[actual_row] < field_width):
                 #Condition what to do when finding a clear position
                 if ((mine_field_data[actual_row][actual_column] == CellStatus.SAFE) and (mine_field_data_overlay[actual_row][actual_column] != CellStatus.SAFE)):
-                    touch_cells = True
+                    touch_adjacent_cells = True
                     mine_field_data_overlay[actual_row][actual_column] = CellStatus.SAFE
-
                 #Go through all surrounding cells
-                check_adjacent_cells(mine_field, mine_field_data, analyse_position, touch_cells, actual_row, actual_column, field_height, field_width)
-
+                check_adjacent_cells(mine_field, mine_field_data, analyse_position, touch_adjacent_cells, actual_row, actual_column, field_height, field_width)
                 #Reset cell clearing
-                touch_cells = False
+                touch_adjacent_cells = False
 
-
-            #Unknown cell analyze
+            #Unknown cell analyze for determine risk calculations
             if (analyse_position[1][1] == CellStatus.UNKNOWN):
-                #Clear all cells that have no ajacent numer
+                #Clear all cells that have no ajacent number
                 for width_pos in range(3):
                     for height_pos in range(3):
                         if (analyse_position[height_pos][width_pos] < 0):
                             analyse_position[height_pos][width_pos] = 0
-
                 #Top
                 risk_sum = abs(analyse_position[0][0]) + abs(analyse_position[0][1]) + abs(analyse_position[0][2])
                 if (risk_sum > 4):
@@ -270,21 +278,27 @@ def main():
                 risk_sum = abs(analyse_position[0][0]) + abs(analyse_position[0][1]) + abs(analyse_position[0][2]) + abs(analyse_position[1][2]) + abs(analyse_position[2][2]) + abs(analyse_position[2][1]) + abs(analyse_position[2][0]) + abs(analyse_position[1][0])
                 if (risk_sum > 3):
                     mine_field_data[actual_row][actual_column] = CellStatus.FLAG
+                #Scan amount of adjacent numbers
+                adjacent_numbers_count = 0
+                for width_pos in range(3):
+                    for height_pos in range(3):
+                        if(analyse_position[height_pos][width_pos] > 0):
+                            adjacent_numbers_count = adjacent_numbers_count + 1
+                if (adjacent_numbers_count == 1):
+                    skip_cell = True
                 #Final option
-                if (mine_field_data[actual_row][actual_column] != CellStatus.FLAG):
+                if ((mine_field_data[actual_row][actual_column] != CellStatus.FLAG) and (skip_cell == False)):
                     touch_cell(mine_field, mine_field_data, actual_row, actual_column, field_width)
                 #Condition what to do when finding a clear position
                 if (mine_field_data[actual_row][actual_column] == CellStatus.SAFE):
-                    touch_cells = True
-                if (mine_field_data[actual_row][actual_column] == CellStatus.EXPLODE):
-                    mine_field_data[actual_row][actual_column] = CellStatus.TRAP
+                    touch_adjacent_cells = True
 
-            #Update sweep position by checking actual and next column
-            if ((mine_field_data[actual_row][actual_column] >= 0) or (mine_field_data[actual_row][actual_column] == CellStatus.FLAG)):
-                sweep_position[actual_row] = sweep_position[actual_row] + 1
-                if (sweep_position[actual_row] >= field_width):
-                    sweep_position[actual_row] = 0
-                
+        #Update sweep position by checking actual and next column
+        if ((mine_field_data[actual_row][actual_column] >= 0) or (mine_field_data[actual_row][actual_column] == CellStatus.FLAG) or (skip_cell == True)):
+            skip_cell = False
+            sweep_position[actual_row] = sweep_position[actual_row] + 1
+            if (sweep_position[actual_row] >= field_width):
+                sweep_position[actual_row] = 0
 
         #Check for next index
         actual_row = actual_row + 1
@@ -314,6 +328,8 @@ def main():
                     stored_pos = mine_field_data[height_pos][width_pos]
                     sweep_active = True
                     touch_cell(mine_field, mine_field_data, height_pos, width_pos, field_width)
+                    if (mine_field_data[height_pos][width_pos] == CellStatus.TRAP):
+                        mine_field_data[height_pos][width_pos] = CellStatus.EXPLODE
                     if (mine_field_data[height_pos][width_pos] == CellStatus.EXPLODE) and (stored_pos == CellStatus.FLAG):
                         mine_field_data[height_pos][width_pos] = CellStatus.FOUND
                     elif (mine_field_data[height_pos][width_pos] != CellStatus.EXPLODE) or (stored_pos == CellStatus.TRAP):

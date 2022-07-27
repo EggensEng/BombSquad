@@ -7,7 +7,7 @@ import seaborn as sns
 class FieldDisplay:
 
     def __init__(self, field_data) -> None:
-        '''The display of a data field'''
+        '''The initialization for a display of a data field'''
 
         cell_colors = ['orange', 'green', 'red', 'blue', 'gray', 'white', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow']
         self.__field_cmap = ListedColormap(cell_colors)
@@ -16,6 +16,7 @@ class FieldDisplay:
 
         grid_kws = {"height_ratios": (.9, .025), "hspace": .1}
         self.__fig, (self.__ax, self.__cbar_ax) = plt.subplots(nrows=2, figsize=(8,18), gridspec_kw=grid_kws)
+        self.__fig.canvas.set_window_title('Mine field')
         self.update_screen(field_data)
 
     def update_screen(self,field_data) -> None:
@@ -25,7 +26,7 @@ class FieldDisplay:
             return
 
         sns.heatmap(field_data,
-            yticklabels=2, 
+            yticklabels=2,
             ax=self.__ax,
             cmap=self.__field_cmap,
             norm=self.__field_norm,
@@ -50,6 +51,7 @@ class FieldDisplay:
         colorbar.set_ticks([(b0+b1)/2 for b0, b1 in zip(self.__field_bounds[:-1], self.__field_bounds[1:])])
         colorbar.set_ticklabels(['Trap', 'Found', 'Bomb', 'Flag', 'Unclear', 'Clear', '                                                     Number of adjacent mines','','','','','',''])
 
+        self.__fig.set_size_inches(8.0, 8.0, forward=True)
         plt.draw()
         plt.pause(0.1)
 
